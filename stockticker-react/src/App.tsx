@@ -1,20 +1,16 @@
 import * as React from 'react';
 import './App.css';
+import { PageHeader } from 'react-bootstrap';
+import StockTicker from './StockTicker'
 
-const logo = require('./logo.svg');
 
 class App extends React.Component {
   render() {
     return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
+        <div className="App">
+            <PageHeader>StockTicker | <small>react ui</small></PageHeader>
+            <StockTicker></StockTicker>
         </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.tsx</code> and save to reload.
-        </p>
-      </div>
     );
   }
 }
