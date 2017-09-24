@@ -1,12 +1,14 @@
 ﻿import * as React from 'react';
 import { Panel, Table, Glyphicon } from 'react-bootstrap';
+import * as $ from 'jquery';
 
-
+/*
 const stockArray = [
     { stock: 'GOOG', price: 570.32, dayOpen: 570.3, change: 0.02, percent: 0.00, directionUp: true },
     { stock: 'MSFT', price: 30.91, dayOpen: 30.31, change: 0.6, percent: 1.94, directionUp: true },
     { stock: 'APPL', price: 577.47, dayOpen: 578.18, change: -0.71, percent: -0.12, directionUp: false },
-    ];
+];
+*/
 
 // Renders a Direction Icon
 const DirectionIcon = (props) => {
@@ -16,11 +18,13 @@ const DirectionIcon = (props) => {
             <Glyphicon glyph="circle-arrow-down" />
     );
 }
-
+const NoData = (props) => {
+    return (<tr><td colSpan={6}>No Data</td></tr>);
+}
 const TickerRow = (props) => {
     return (
         <tr>
-            <td>{props.stock}</td>
+            <td>{props.symbol}</td>
             <td>{props.price}</td>
             <td>{props.dayOpen}</td>
             <td>{props.change}</td>
@@ -31,13 +35,16 @@ const TickerRow = (props) => {
 }
 
 class StockTicker extends React.Component {
+
     state = {
-        stockItems: stockArray,
+        stockItems : [], 
     };
+    
+    ticker : any;
 
     renderRow(s) {
-        return <TickerRow key={s.stock}  
-            stock={s.stock}
+        return <TickerRow key={s.symbol}  
+            stock={s.symbol}
             price={s.price} 
             dayOpen={s.dayOpen} 
             change={s.change}
@@ -46,7 +53,11 @@ class StockTicker extends React.Component {
     };
 
     render() {
-        const rowItems = this.state.stockItems.map((stock) => this.renderRow(stock));
+        const rowItems = this.state.stockItems.length > 0 ? 
+            this.state.stockItems.map((stock) => this.renderRow(stock)) :
+            <NoData />;
+            
+
         return (
             <Panel>
                 <h2>Live Stock Table</h2>
@@ -70,7 +81,32 @@ class StockTicker extends React.Component {
             </Panel>
         );
     }
+
+    updateStockHandler(stocks) {
+        this.setState({stockItems : stocks});
+    }
+
+    init() {
+        this.ticker.server.getAllStocks().done(function (stocks) {
+            this.updateStockHandler(stocks);
+        });
+    }
+
+    componentDidMount() {
+        this.ticker = $.connection.stockTickerMini // the generated client-side hub proxy
+            // Add a client-side hub method that the server will call
+        this.ticker.client.updateStockPrice = function (stock) {
+            this.updateStockHandler(stock);
+        }
+
+        // Turn on logging
+        $.connection.hub.logging = true;
+
+        // Start the connection
+        $.connection.hub.start().done(this.init);
+    }
 }
 
 
 export default StockTicker
+

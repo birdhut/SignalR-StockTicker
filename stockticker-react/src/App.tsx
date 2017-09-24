@@ -9,7 +9,7 @@ class App extends React.Component {
     return (
         <div className="App">
             <PageHeader>StockTicker | <small>react ui</small></PageHeader>
-            <StockTicker></StockTicker>
+            <StockTicker />
         </div>
     );
   }
