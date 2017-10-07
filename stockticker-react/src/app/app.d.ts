@@ -1,5 +1,5 @@
 interface JQueryStatic {
-    connection: Connection;
+    connection: any;
   }
 
 interface Connection {

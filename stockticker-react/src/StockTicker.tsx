@@ -1,6 +1,5 @@
 ﻿import * as React from 'react';
 import { Panel, Table, Glyphicon } from 'react-bootstrap';
-import * as $ from 'jquery';
 
 /*
 const stockArray = [
@@ -24,35 +23,40 @@ const NoData = (props) => {
 const TickerRow = (props) => {
     return (
         <tr>
-            <td>{props.symbol}</td>
+            <td>{props.stock}</td>
             <td>{props.price}</td>
             <td>{props.dayOpen}</td>
             <td>{props.change}</td>
             <td><DirectionIcon directionUp={props.directionUp} /></td>
-            <td>{props.percent}</td>
         </tr>
     );
 }
 
-class StockTicker extends React.Component {
+export default class StockTicker extends React.Component<any, any> {
+    constructor(props: any) {
+        super(props);
 
-    state = {
-        stockItems : [], 
-    };
+        this.state = {
+            stockItems: [],
+        };
+    }
+    
+    
     
     ticker : any;
 
     renderRow(s) {
-        return <TickerRow key={s.symbol}  
-            stock={s.symbol}
-            price={s.price} 
-            dayOpen={s.dayOpen} 
-            change={s.change}
-            percent={s.percent}
+        return <TickerRow key={s.Symbol}  
+            stock={s.Symbol}
+            price={s.Price} 
+            dayOpen={s.DayOpen} 
+            change={s.Change}
+            percent={s.Percent}
             directionUp={s.directionUp}></TickerRow>
     };
 
     render() {
+        //console.info(this.state.stockItems);
         const rowItems = this.state.stockItems.length > 0 ? 
             this.state.stockItems.map((stock) => this.renderRow(stock)) :
             <NoData />;
@@ -69,44 +73,62 @@ class StockTicker extends React.Component {
                             <th>Open</th>
                             <th>Change</th>
                             <th><DirectionIcon directionUp={true} /><DirectionIcon directionUp={false} /></th>
-                            <th>%</th>
                         </tr>
                     </thead>
                     <tbody>
-                        
                             {rowItems}
-                        
                     </tbody>
                 </Table>
             </Panel>
         );
     }
 
-    updateStockHandler(stocks) {
-        this.setState({stockItems : stocks});
+    updateAllStocksHandler = (stocks) => {
+        this.setState({stockItems: stocks});
     }
 
-    init() {
-        this.ticker.server.getAllStocks().done(function (stocks) {
-            this.updateStockHandler(stocks);
-        });
+    updateStockHandler = (stock) =>  {
+        
+        // copy stock to new variable to avoid mutation
+        var key = stock.Symbol;
+        var items = this.state.stockItems.slice();
+        var item = items.filter(function( s ) {
+            return s.Symbol === key;
+          })[0];
+
+        // Update the values and set if it exists
+        if (item) {
+            var up = item.Price < stock.Price;
+            item.Price = stock.Price;
+            item.Change = stock.Change;
+            item.PercentChange = stock.PercentChange;
+            item.directionUp = up;
+            this.setState(items);
+        }
     }
 
     componentDidMount() {
+        var handler = this.updateStockHandler;
+        var allHandler = this.updateAllStocksHandler;
         this.ticker = $.connection.stockTickerMini // the generated client-side hub proxy
-            // Add a client-side hub method that the server will call
+        $.connection.hub.url = 'http://localhost:53654/signalr';
+        
+        // Add a client-side hub method that the server will call
         this.ticker.client.updateStockPrice = function (stock) {
-            this.updateStockHandler(stock);
+            handler(stock);
         }
 
         // Turn on logging
         $.connection.hub.logging = true;
 
         // Start the connection
-        $.connection.hub.start().done(this.init);
+        var server = this.ticker.server;
+        $.connection.hub.start().done(function() {
+            server.getAllStocks().done(function (stocks) {
+                allHandler(stocks);
+            });
+        });
     }
 }
 
-
-export default StockTicker
 
