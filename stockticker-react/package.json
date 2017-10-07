@@ -1,0 +1,25 @@
+{
+  "name": "stockticker-react",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "jquery": "^3.2.1",
+    "react": "^15.6.1",
+    "react-bootstrap": "^0.31.3",
+    "react-dom": "^15.6.1",
+    "react-scripts-ts": "2.7.0",
+    "signalr": "^2.2.2"
+  },
+  "scripts": {
+    "start": "react-scripts-ts start",
+    "build": "react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom",
+    "eject": "react-scripts-ts eject"
+  },
+  "devDependencies": {
+    "@types/jest": "^21.1.0",
+    "@types/node": "^8.0.30",
+    "@types/react": "^16.0.5",
+    "@types/react-dom": "^15.5.4"
+  }
+}
